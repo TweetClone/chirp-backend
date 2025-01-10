@@ -18,48 +18,11 @@ const addMessage = async (req, res) => {
   }
 };
 
-const getDirectMessage = async (req, res) => {
-  try {
-    const { userId1, userId2 } = req.params;
-    const messageQuery = await pool.query(messageQueries.getDirectMessage, [
-      userId1,
-      userId2,
-    ]);
-    const userQuery = await pool.query(messageQueries.getOtherUser, [userId2]);
-    res.send({ messages: messageQuery.rows, otherUser: userQuery.rows[0] });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-};
-
-const getConversationList = async (req, res) => {
+const getConversations = async (req, res) => {
   try {
     const { userId } = req.query;
-    const query = await pool.query(messageQueries.getConversationList, [
-      userId,
-    ]);
+    const query = await pool.query(messageQueries.getConversations, [userId]);
     res.send(query.rows);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-};
-
-const getModalConversations = async (req, res) => {
-  try {
-    const { userId } = req.query;
-    const query = await pool.query(messageQueries.getConversationList, [
-      userId,
-    ]);
-    const filteredQuery = query.rows.map(
-      ({ otherUserId, displayName, username }) => ({
-        userId: otherUserId,
-        displayName,
-        username,
-      }),
-    );
-    res.send(filteredQuery);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -77,10 +40,27 @@ const getFollowedList = async (req, res) => {
   }
 };
 
+const getMessages = async (req, res) => {
+  try {
+    const { userId1, userId2 } = req.params;
+    const messageQuery = await pool.query(messageQueries.getMessages, [
+      userId1,
+      userId2,
+    ]);
+    const chatBioQuery = await pool.query(messageQueries.getChatBio, [userId2]);
+    res.send({
+      messages: messageQuery.rows,
+      chatBio: chatBioQuery.rows[0],
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+};
+
 module.exports = {
   addMessage,
-  getDirectMessage,
-  getConversationList,
-  getModalConversations,
+  getConversations,
   getFollowedList,
+  getMessages,
 };

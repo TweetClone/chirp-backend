@@ -4,38 +4,7 @@ const addMessage = `
   RETURNING *;
 `;
 
-const getDirectMessage = `
-  SELECT *
-  FROM message
-  WHERE "sentUserId" in ($1, $2) 
-    AND "receivedUserId" in ($1, $2)
-  ORDER BY timestamp;
-`;
-
-const getConversationList = `
-  SELECT DISTINCT ON("otherUserId")
-    "displayName",
-    username,
-    "textContent",
-    timestamp,
-    s."otherUserId"
-  FROM (
-    SELECT m.*,
-      CASE
-        WHEN "sentUserId" = $1 
-        THEN "receivedUserId" 
-        ELSE "sentUserId" 
-      END AS "otherUserId"
-    FROM message m
-    WHERE m."sentUserId" = $1
-      OR m."receivedUserId" = $1
-  ) AS s
-  INNER JOIN app_user u 
-    ON s."otherUserId" = u."userId"
-  ORDER BY "otherUserId", timestamp DESC;
-`;
-
-const getOtherUser = `
+const getChatBio = `
   SELECT
     username,
     "displayName",
@@ -46,9 +15,33 @@ const getOtherUser = `
         COUNT(*)
       FROM follow
       WHERE "followedUserId" = u."userId"
-    ) AS "followerCount"
+    ) AS "followerCount",
+     "userId"
   FROM app_user as u
   WHERE "userId" = $1;
+`;
+
+const getConversations = `
+  SELECT DISTINCT ON("userId")
+    "displayName",
+    username,
+    "textContent",
+    timestamp,
+    s."userId"
+  FROM (
+    SELECT m.*,
+      CASE
+        WHEN "sentUserId" = $1 
+        THEN "receivedUserId" 
+        ELSE "sentUserId" 
+      END AS "userId"
+    FROM message m
+    WHERE m."sentUserId" = $1
+      OR m."receivedUserId" = $1
+  ) AS s
+  INNER JOIN app_user u 
+    ON s."userId" = u."userId"
+  ORDER BY "userId", timestamp DESC;
 `;
 
 const getFollowedList = `
@@ -62,10 +55,18 @@ const getFollowedList = `
   WHERE f."followerUserId" = $1;
 `;
 
+const getMessages = `
+  SELECT *
+  FROM message
+  WHERE "sentUserId" in ($1, $2) 
+    AND "receivedUserId" in ($1, $2)
+  ORDER BY timestamp;
+`;
+
 module.exports = {
   addMessage,
-  getDirectMessage,
-  getConversationList,
+  getChatBio,
+  getConversations,
   getFollowedList,
-  getOtherUser,
+  getMessages,
 };
