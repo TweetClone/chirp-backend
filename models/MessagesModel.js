@@ -44,17 +44,6 @@ const getConversations = `
   ORDER BY "userId", timestamp DESC;
 `;
 
-const getFollowedList = `
-  SELECT 
-    u."userId", 
-    u."displayName", 
-    u."username"
-  FROM app_user u
-  INNER JOIN follow f
-    ON u."userId" = f."followedUserId"
-  WHERE f."followerUserId" = $1;
-`;
-
 const getMessages = `
   SELECT *
   FROM message
@@ -67,6 +56,5 @@ module.exports = {
   addMessage,
   getChatBio,
   getConversations,
-  getFollowedList,
   getMessages,
 };

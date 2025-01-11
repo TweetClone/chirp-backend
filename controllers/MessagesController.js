@@ -29,17 +29,6 @@ const getConversations = async (req, res) => {
   }
 };
 
-const getFollowedList = async (req, res) => {
-  try {
-    const { userId } = req.query;
-    const query = await pool.query(messageQueries.getFollowedList, [userId]);
-    res.send(query.rows);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-};
-
 const getMessages = async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
@@ -61,6 +50,5 @@ const getMessages = async (req, res) => {
 module.exports = {
   addMessage,
   getConversations,
-  getFollowedList,
   getMessages,
 };
